@@ -50,18 +50,44 @@ const authenticateUser = async (req, res, next) => {
 }
 
 //The User routes
+//get currently authenticated user
 router.get('/users', authenticateUser ,asyncHandler(async (req, res) => {
-  // const users = await User.findAll({ order: [["id", "ASC"]] })
-  // res.json(users)
   const user = req.currentUser;
-
+  //format the res to be lil nicer
   res.json({
     name: user.firstName + ' ' + user.lastName,
     username: user.emailAddress
   })
 }))
+//create a new user
+router.post('/users',[
+  check('firstName')
+    .exists({ checkNull: true, checkFalsy: true})
+    .withMessage('Please provide a value for "firstName"'),
+  check('lastName')
+    .exists({ checkNull: true, checkFalsy: true})
+    .withMessage('Please provide a value for "lastName"'),
+  check('emailAddress')
+    .exists({ checkNull: true, checkFalsy: true})
+    .withMessage('Please provide a value for "emailAddress"'),
+  check('password')
+    .exists({ checkNull: true, checkFalsy: true})
+    .withMessage('Please provide a value for "password"')
+], asyncHandler(async (req, res) => {
+    const errors = validationResult(req);
 
-router.post('/users', asyncHandler(async (req, res) => {
+    //if there are any
+    if(!errors.isEmpty()){
+      const errorMessages = errors.array().map(err => err.msg)
+      return res.status(400).json({ errors: errorMessages })
+    }
+
+    const user = req.body;
+    user.password = bcryptjs.hashSync(user.password)
+
+    await User.create({ ...user })
+
+    return res.status(201).end()
 
 }))
 
