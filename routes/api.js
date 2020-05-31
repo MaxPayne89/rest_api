@@ -90,6 +90,12 @@ router.post('/users',[
     return res.status(201).end()
 
 }))
+//course routes
+//get all courses
+router.get('/courses', asyncHandler(async (req, res) => {
+  const courses = await Course.findAll({order: [["id", "ASC"]] })
+  res.json(courses)
+}))
 
 
 module.exports = router
