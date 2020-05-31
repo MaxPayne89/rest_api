@@ -105,6 +105,30 @@ router.get('/courses/:id', asyncHandler(async (req, res) => {
     res.status(400).json({ msg: "Could not find a course with a corresponding ID"})
   }
 }))
+//create new course
+router.post('/courses', authenticateUser,[
+  check('title')
+    .exists({ checkNull: true, checkFalsy: true })
+    .withMessage('Please provide a value for "title"!'),
+  check('description')
+    .exists({ checkNull: true, checkFalsy: true})
+    .withMessage('Please provide a value for "description"!'),
+], asyncHandler(async (req, res) => {
+    const errors = validationResult(req);
+    //if there are any
+    if(!errors.isEmpty()){
+      const errorMessages = errors.array().map(err => err.msg)
+      return res.status(400).json({ errors: errorMessages })
+    }
+
+    const course = req.body;
+    course.userId = req.currentUser.id;
+
+    await Course.create({...course})
+
+    return res.status(201).end()
+
+}))
 
 
 module.exports = router
