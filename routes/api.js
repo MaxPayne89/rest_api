@@ -96,6 +96,15 @@ router.get('/courses', asyncHandler(async (req, res) => {
   const courses = await Course.findAll({order: [["id", "ASC"]] })
   res.json(courses)
 }))
+//get one course
+router.get('/courses/:id', asyncHandler(async (req, res) => {
+  const course = await Course.findByPk(req.params.id)
+  if(course){
+    res.json(course)
+  }else {
+    res.status(400).json({ msg: "Could not find a course with a corresponding ID"})
+  }
+}))
 
 
 module.exports = router
