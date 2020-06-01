@@ -90,19 +90,50 @@ router.post('/users',[
     return res.status(201).end()
 
 }))
+//updates a user
+router.put('/users/:id', authenticateUser, [
+  check('firstName')
+    .exists({ checkNull: true, checkFalsy: true})
+    .withMessage('Please provide a value for "firstName"'),
+  check('lastName')
+    .exists({ checkNull: true, checkFalsy: true})
+    .withMessage('Please provide a value for "lastName"'),
+  check('emailAddress')
+    .exists({ checkNull: true, checkFalsy: true})
+    .withMessage('Please provide a value for "emailAddress"'),
+  check('password')
+    .exists({ checkNull: true, checkFalsy: true})
+    .withMessage('Please provide a value for "password"')
+], asyncHandler(async (req,res) => {
+  const errors = validationResult(req);
+
+  if(!errors.isEmpty()){
+    const errorMessages = errors.array().map(err => err.msg);
+    return res.status(400).json({ errors: errorMessages });
+  }
+   const userToBeUpdated = await User.findByPk(req.params.id);
+
+   if(userToBeUpdated){
+     const updates = req.body;
+     userToBeUpdated.update({ ...updates });
+     res.status(204).end();
+   } else {
+     return res.status(400).json({ msg: "Cannot find a User with the corresponding ID!"})
+   }
+}))
 //course routes
 //get all courses
 router.get('/courses', asyncHandler(async (req, res) => {
-  const courses = await Course.findAll({order: [["id", "ASC"]] })
-  res.json(courses)
+  const courses = await Course.findAll({order: [["id", "ASC"]] });
+  res.json(courses);
 }))
 //get one course
 router.get('/courses/:id', asyncHandler(async (req, res) => {
-  const course = await Course.findByPk(req.params.id)
+  const course = await Course.findByPk(req.params.id);
   if(course){
-    res.json(course)
+    res.json(course);
   }else {
-    res.status(400).json({ msg: "Could not find a course with a corresponding ID"})
+    res.status(400).json({ msg: "Could not find a course with a corresponding ID"});
   }
 }))
 //create new course
@@ -117,8 +148,8 @@ router.post('/courses', authenticateUser,[
     const errors = validationResult(req);
     //if there are any
     if(!errors.isEmpty()){
-      const errorMessages = errors.array().map(err => err.msg)
-      return res.status(400).json({ errors: errorMessages })
+      const errorMessages = errors.array().map(err => err.msg);
+      return res.status(400).json({ errors: errorMessages });
     }
 
     const course = req.body;
