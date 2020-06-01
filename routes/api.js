@@ -23,7 +23,7 @@ const authenticateUser = async (req, res, next) => {
   const credentials = auth(req)
 
   if(credentials){
-    //look for the in the db
+    //look for the user in the db
     const user = await User.findOne({ where: { emailAddress: credentials.name}})
 
     if(user){
@@ -53,7 +53,7 @@ const authenticateUser = async (req, res, next) => {
 //get currently authenticated user
 router.get('/users', authenticateUser ,asyncHandler(async (req, res) => {
   const user = req.currentUser;
-  //format the res to be lil nicer
+  //format the res to be a lil nicer
   res.json({
     name: user.firstName + ' ' + user.lastName,
     username: user.emailAddress
