@@ -129,7 +129,7 @@ router.post('/courses', authenticateUser,[
     return res.status(201).end()
 
 }))
-
+//update a course
 router.put('/courses/:id', authenticateUser, [
   check('title')
     .exists({ checkNull: true, checkFalsy: true })
@@ -154,7 +154,16 @@ router.put('/courses/:id', authenticateUser, [
   }else {
     return res.status(400).json({ msg: "Could not find a course with a corresponding ID!"})
   }
-
+}))
+//delete a course
+router.delete('/courses/:id', authenticateUser, asyncHandler(async (req, res) => {
+  const courseToBeDeleted = await Course.findByPk(req.params.id);
+  if(courseToBeDeleted){
+    await courseToBeDeleted.destroy()
+    return res.status(204).end()
+  }else {
+    res.status(400).json({ msg: "Could not find a course with a corresponding ID!"})
+  }
 }))
 
 
