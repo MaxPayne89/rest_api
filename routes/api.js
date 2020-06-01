@@ -130,5 +130,32 @@ router.post('/courses', authenticateUser,[
 
 }))
 
+router.put('/courses/:id', authenticateUser, [
+  check('title')
+    .exists({ checkNull: true, checkFalsy: true })
+    .withMessage('Please provide a value for "title"!'),
+  check('description')
+    .exists({ checkNull: true, checkFalsy: true})
+    .withMessage('Please provide a value for "description"!'),
+], asyncHandler(async (req, res) => {
+  const errors = validationResult(req);
+
+  if(!errors.isEmpty()){
+    const errorMessages = errors.array().map(err => err.msg)
+    return res.status(400).json({ errors: errorMessages })
+  }
+
+  const courseToBeUpdated = await Course.findByPk(req.params.id)
+  //if it exists
+  if(courseToBeUpdated){
+    const updates = req.body;
+    await courseToBeUpdated.update({ ...updates });
+    return res.status(204).end()
+  }else {
+    return res.status(400).json({ msg: "Could not find a course with a corresponding ID!"})
+  }
+
+}))
+
 
 module.exports = router
