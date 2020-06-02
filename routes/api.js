@@ -55,7 +55,8 @@ router.get('/users', authenticateUser ,asyncHandler(async (req, res) => {
   const user = req.currentUser;
   //format the res to be a lil nicer
   res.json({
-    name: user.firstName + ' ' + user.lastName,
+    firstName: user.firstName ,
+    lastName: user.lastName,
     username: user.emailAddress
   })
 }))
@@ -87,7 +88,8 @@ router.post('/users',[
 
     await User.create({ ...user })
 
-    return res.status(201).end()
+    res.location('/')
+    return res.status(201).send()
 
 }))
 //updates a user
@@ -115,6 +117,7 @@ router.put('/users/:id', authenticateUser, [
 
    if(userToBeUpdated){
      const updates = req.body;
+     updates.password = bcryptjs.hashSync(updates.password)
      userToBeUpdated.update({ ...updates });
      res.status(204).end();
    } else {
@@ -155,9 +158,10 @@ router.post('/courses', authenticateUser,[
     const course = req.body;
     course.userId = req.currentUser.id;
 
-    await Course.create({...course})
+    const newCourse = await Course.create({...course})
 
-    return res.status(201).end()
+    res.location(`/api/courses/${newCourse.id}`)
+    return res.status(201).send()
 
 }))
 //update a course
